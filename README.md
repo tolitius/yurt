@@ -6,7 +6,7 @@ high quality mounted real (e)states
 
 Building standalone application Yurts with [mount](https://github.com/tolitius/mount).
 
-A brand new _local_ Yurt of components can be created and passed down to the application for fun and profit.
+Multiple brand new _local_ Yurts with components can be created and passed down to the application / REPL to be used simultaneously for fun and profit.
 
 ## Show me
 
