@@ -2,9 +2,9 @@
   (:require [mount.core :as mount]))
 
 (defprotocol Hut
-  (build [this] "builds a yurt")
-  (destroy [this] "destroys a yurt")
-  (build-with [this substitutes] "builds a yurt with some components substituted")
+  (build [this] "builds a hut")
+  (destroy [this] "destroys a hut")
+  (build-with [this substitutes] "builds a hut with some components substituted")
   ;; (build-without [this components])
   ;; (destroy-except [this components])
   )
@@ -86,8 +86,8 @@
 ;; REPLing it
 
 (require '[yurt.core :as yurt])
-(def u (yurt/blueprint))
-(def u (yurt/build u))
+(def b (yurt/blueprint))
+(def y (yurt/build b))
 
 ;; at this point the yurt is up and detached: i.e. "global" vars and mount do not see it
 )

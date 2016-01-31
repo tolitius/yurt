@@ -1,6 +1,12 @@
 # yurt
 
-high quality mounted real (e)states
+  module  |  branch  |  status
+----------|----------|----------
+   yurt   | `master` | [![Circle CI](https://circleci.com/gh/tolitius/yurt/tree/master.png?style=svg)](https://circleci.com/gh/tolitius/yurt/tree/master)
+
+[![Clojars Project](http://clojars.org/yurt/latest-version.svg)](http://clojars.org/yurt)
+
+> <img src="doc/img/slack-icon.png" width="30px"> _any_ questions or feedback: [`#mount`](https://clojurians.slack.com/messages/mount/) clojurians slack channel (or just [open an issue](https://github.com/tolitius/mount/issues))
 
 ## What is it for?
 

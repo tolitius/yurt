@@ -1,3 +1,5 @@
+(def +version+ "0.1.0-SNAPSHOT")
+
 (set-env!
   :source-paths #{"src"}
   :dependencies '[[mount                          "0.1.9-SNAPSHOT"]
@@ -23,12 +25,15 @@
                   [tolitius/boot-check      "0.1.1"           :scope "test"]])
 
 
-(require '[tolitius.boot-check :as check]
+(require '[adzerk.bootlaces :refer :all]
+         '[tolitius.boot-check :as check]
          '[tolitius.boot-stripper :refer [strip-deps-attr]]
          '[clojure.tools.namespace.repl :refer [set-refresh-dirs]]
          '[adzerk.boot-test :as bt]
          '[adzerk.boot-logservice :as log-service]
          '[clojure.tools.logging :as log])
+
+(bootlaces! +version+)
 
 (def log4b
   [:configuration
@@ -49,9 +54,23 @@
   (require 'dev)
   (in-ns 'dev))
 
+(deftask test []
+  (set-env! :source-paths #(conj % "test" "dev/clj"))
+  (bt/test))
+
 (deftask check-sources []
   (comp
     (check/with-bikeshed)
     (check/with-eastwood)
     (check/with-yagni)
     (check/with-kibit)))
+
+(task-options!
+  push {:ensure-branch nil}
+  pom {:project     'yurt
+       :version     +version+
+       :description "high quality mounted real (e)states"
+       :url         "https://github.com/tolitius/yurt"
+       :scm         {:url "https://github.com/tolitius/yurt"}
+       :license     {"Eclipse Public License"
+                     "http://www.eclipse.org/legal/epl-v10.html"}})
