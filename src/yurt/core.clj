@@ -80,14 +80,3 @@
       (build-with [_ substitutes] (->Yurt (spawn meta-state :swap substitutes) bp))
       (destroy [it] (bulldoze (:components it) stop-fns)))
     (->Yurt (not-started states) bp)))
-
-(comment
-
-;; REPLing it
-
-(require '[yurt.core :as yurt])
-(def b (yurt/blueprint))
-(def y (yurt/build b))
-
-;; at this point the yurt is up and detached: i.e. "global" vars and mount do not see it
-)
