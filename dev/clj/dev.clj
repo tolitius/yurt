@@ -12,23 +12,14 @@
             [neo.options.engine :refer [match-quote]]
             [neo.options.orders :refer [find-orders add-order]]))
 
-(defn start []
-  (with-logging-status)
-  (mount/start))
-
-(defn stop []
-  (mount/stop))
+(with-logging-status)
+(load-data-readers!)
 
 (defn refresh []
-  (stop)
   (tn/refresh))
 
 (defn refresh-all []
-  (stop)
   (tn/refresh-all))
 
 (defn reset []
-  (stop)
-  (tn/refresh :after 'dev/start))
-
-(load-data-readers!)
+  (refresh))

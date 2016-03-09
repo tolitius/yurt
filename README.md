@@ -90,6 +90,11 @@ Usually a test Yurt would be started with a different configuration so, for exam
 This can be done with the `(yurt/build-with)` function:
 
 ```clojure
+(require '[clojure.edn :as edn])
+(def test-config (edn/read-string (slurp "dev/resources/test-config.edn")))
+```
+
+```clojure
 (def test-yurt (yurt/build-with 
                  (yurt/blueprint) 
                  {"app.conf/config" test-config}))
@@ -286,7 +291,7 @@ Great, we are now ready to build as many _local_, `mount` based Yurts as we'd li
 
 ## License
 
-Copyright © 2015 tolitius
+Copyright © 2016 tolitius
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

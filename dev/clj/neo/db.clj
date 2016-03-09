@@ -4,10 +4,6 @@
             [clojure.tools.logging :refer [info]]
             [neo.conf :refer [config]]))
 
-(def boo (do
-           (#'clojure.core/load-data-readers)
-           (set! *data-readers* (.getRawRoot #'*data-readers*))))
-
 (defn- new-connection [conf]
   (info "conf: " conf)
   (let [uri (get-in conf [:datomic :uri])]

@@ -34,9 +34,15 @@
   (into {} (for [[k v] states]
              [(unvar-state k) v])))
 
+(defn- detach-state [state status]
+  (#'mount.core/alter-state! status :not-started)
+  (swap! @#'mount.core/running dissoc state)
+  (#'mount.core/update-meta! [state :status] #{:stopped}))
+
 (defn- detach [sys]
   (doseq [[state status] sys]
-    (#'mount.core/down state status (atom []))))
+    (detach-state state status)
+    (#'mount.core/rollback! state)))
 
 (defn- attach [sys]
   (into {}
