@@ -1,8 +1,8 @@
-(def +version+ "0.1.0-SNAPSHOT")
+(def +version+ "0.1.0")
 
 (set-env!
   :source-paths #{"src"}
-  :dependencies '[[mount                          "0.1.9-SNAPSHOT"]
+  :dependencies '[[mount                          "0.1.10"]
 
                   ;; deps for sample apps
                   [datascript                     "0.13.3"    :scope "provided"]
