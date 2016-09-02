@@ -97,7 +97,7 @@ This can be done with the `(yurt/build-with)` function:
 ```clojure
 (def test-yurt (yurt/build-with 
                  (yurt/blueprint) 
-                 {"app.conf/config" test-config}))
+                 {"neo.conf/config" test-config}))
 ```
 
 `(build-with)` takes a blueprint and a map where keys are component names, and values are the substitutes (i.e. any values), in this case `test-config` is a substitute.
