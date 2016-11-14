@@ -17,6 +17,7 @@ Multiple brand new _local_ Yurts with components can be created and passed down 
 - [Building Yurts](#building-yurts)
 - [Destroying Yurts](#destroying-yurts)
 - [Swapping Alternate Implementations](#swapping-alternate-implementations)
+- [Building Smaller Yurts](#building-smaller-yurts)
 - [Stop functions](#stop-functions)
 - [Show me](#show-me)
 
@@ -101,6 +102,53 @@ This can be done with the `(yurt/build-with)` function:
 ```
 
 `(build-with)` takes a blueprint and a map where keys are component names, and values are the substitutes (i.e. any values), in this case `test-config` is a substitute.
+
+## Building Smaller Yurts
+
+A Yurt can be built with `only` certain components specified:
+
+```clojure
+dev=> (def bp (yurt/blueprint))
+dev=> (def dev-yurt (yurt/build-only bp #{"neo.conf/config" "neo.app/nrepl"}))
+
+INFO  utils.logging - >> starting.. #'neo.conf/config
+INFO  neo.conf - loading config from dev/resources/config.edn
+INFO  utils.logging - >> starting.. #'neo.app/nrepl
+#'dev/dev-yurt
+dev=>
+```
+
+notice it was built with a `build-only` function that takes a blueprint and components
+that this Yurt should be built from. In this case `#{"neo.conf/config" "neo.app/nrepl"}`.
+
+Here is what the built Yurt looks like:
+
+```clojure
+dev=> (pprint dev-yurt)
+{:components
+ {"neo.conf/config"
+  {:datomic {:uri "datomic:mem://yurt"},
+   :www {:port 4242},
+   :nrepl {:host "0.0.0.0", :port 7878}},
+  "neo.app/nrepl"
+  #clojure.tools.nrepl.server.Server{:server-socket #object[java.net.ServerSocket 0x173f7861 "ServerSocket[addr=/0.0.0.0,localport=7878]"], :port 7878, :open-transports #object[clojure.lang.Atom 0x284e5c96 {:status :ready, :val #{}}], :transport #object[clojure.tools.nrepl.transport$bencode 0x78bb7947 "clojure.tools.nrepl.transport$bencode@78bb7947"], :greeting nil, :handler #object[clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__2035 0x72d2a9bf "clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__2035@72d2a9bf"], :ss #object[java.net.ServerSocket 0x173f7861 "ServerSocket[addr=/0.0.0.0,localport=7878]"]}},
+ :blueprint
+ {"neo.conf/config" {:order 1},
+  "neo.db/db" {:order 2},
+  "neo.www/neo-app" {:order 3},
+  "neo.app/nrepl" {:order 4}}}
+```
+
+i.e. only `"neo.conf/config"` and `"neo.app/nrepl"` are the components of this Yurt.
+
+and when this yurt is destroyed:
+```clojure
+dev=> (yurt/destroy dev-yurt)
+{:stopped #{"neo.app/nrepl"}}
+```
+
+only the components that were part of the Yurt were stopped. In this case `"neo.app/nrepl"`,
+since `"neo.conf/config"` does not have a stop function.
 
 ## Stop functions
 

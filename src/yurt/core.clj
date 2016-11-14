@@ -5,6 +5,7 @@
   (build [this] "builds a hut")
   (destroy [this] "destroys a hut")
   (build-with [this substitutes] "builds a hut with some components substituted")
+  (build-only [this components] "builds a hut out of only components provided")
   ;; (build-without [this components])
   ;; (destroy-except [this components])
   )
@@ -19,10 +20,15 @@
                     [name fun])))))
 
 (defn- bulldoze [components funs]
-  (into {}
-        (doseq [[name fun] funs]
-          ((fun) (components name))
-          [name :stopped])))
+  (reduce (fn [cs [name fun]]
+            (let [component (components name)]
+              (if (and component                        ;; only destroy existing components
+                       (not= component :not-started))   ;; that were started
+                (do ((fun) component)
+                    (conj cs name))
+                cs)))
+          #{}
+          funs))
 
 (defn- unvar-state [s]
   (->> s (drop 2) (apply str)))  ;; magic 2 is removing "#'" in state name
@@ -44,22 +50,30 @@
     (detach-state state status)
     (#'mount.core/rollback! state)))
 
-(defn- attach [sys]
-  (into {}
-        (for [[k {:keys [var]}] sys]
-          [(unvar-state k) @var])))
+(defn- var-comp [xs]
+  (into #{} (map var-state xs)))
+
+(defn- attach [sys & {:keys [only]}]
+  (let [in-scope? (var-comp only)
+        no-scope? (empty? in-scope?)]
+    (into {}
+          (for [[k {:keys [var]}] sys]
+            (when (or no-scope?
+                      (in-scope? k))
+                [(unvar-state k) @var])))))
 
 (defn- var-subs [m]
   (into {}
         (for [[k v] m]
           [(var-state k) v])))
 
-;; TODO: this will take with / without / individual states
-(defn- spawn [sys & {:keys [swap]}]
-  (if-not swap
-    (mount/start)
-    (mount/start-with (var-subs swap)))
-  (let [spawned (attach @sys)]
+;; TODO: combinations of only/swap/etc..
+(defn- spawn [sys & {:keys [swap only] :as ops}]
+  (condp some (keys ops)
+    #{:swap} (mount/start-with (var-subs swap))
+    #{:only} (mount/start (var-comp only))
+    (mount/start))
+  (let [spawned (attach @sys :only only)]
     (detach @sys)
     spawned))
 
@@ -84,5 +98,6 @@
       Hut
       (build [_] (->Yurt (spawn meta-state) bp))
       (build-with [_ substitutes] (->Yurt (spawn meta-state :swap substitutes) bp))
-      (destroy [it] (bulldoze (:components it) stop-fns)))
+      (build-only [_ components] (->Yurt (spawn meta-state :only components) bp))
+      (destroy [it] {:stopped (bulldoze (:components it) stop-fns)}))
     (->Yurt (not-started states) bp)))
