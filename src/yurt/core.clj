@@ -6,9 +6,10 @@
   (destroy [this] "destroys a hut")
   (build-with [this substitutes] "builds a hut with some components substituted")
   (build-only [this components] "builds a hut out of only components provided")
+  (build-only-with [this components substitutes] "builds a hut of only components provided, with substitutions"))
   ;; (build-without [this components])
   ;; (destroy-except [this components])
-  )
+  
 
 (defrecord Yurt [components blueprint])
 
@@ -69,9 +70,12 @@
 
 ;; TODO: combinations of only/swap/etc..
 (defn- spawn [sys & {:keys [swap only] :as ops}]
-  (condp some (keys ops)
-    #{:swap} (mount/start-with (var-subs swap))
-    #{:only} (mount/start (var-comp only))
+  (condp = (keys ops)
+    [:only :swap] (-> (mount/only (var-comp only))
+                      (mount/swap (var-subs swap))
+                      (mount/start))
+    [:swap] (mount/start-with (var-subs swap))
+    [:only] (mount/start (var-comp only))
     (mount/start))
   (let [spawned (attach @sys :only only)]
     (detach @sys)
@@ -91,7 +95,7 @@
   (let [meta-state @#'mount.core/meta-state
         states (-> (sort-by (comp :order val) < 
                             @meta-state)
-                    unvar-names)
+                   unvar-names)
         bp (new-blueprint states)
         stop-fns (reverse (select-fun states :stop))]
     (extend-type Yurt
@@ -99,5 +103,6 @@
       (build [_] (->Yurt (spawn meta-state) bp))
       (build-with [_ substitutes] (->Yurt (spawn meta-state :swap substitutes) bp))
       (build-only [_ components] (->Yurt (spawn meta-state :only components) bp))
+      (build-only-with [_ components substitutes] (->Yurt (spawn meta-state :only components :swap substitutes) bp))
       (destroy [it] {:stopped (bulldoze (:components it) stop-fns)}))
     (->Yurt (not-started states) bp)))

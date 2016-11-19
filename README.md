@@ -150,6 +150,8 @@ dev=> (yurt/destroy dev-yurt)
 only the components that were part of the Yurt were stopped. In this case `"neo.app/nrepl"`,
 since `"neo.conf/config"` does not have a stop function.
 
+You can also use `yurt/build-only-with` to only start specific components of your choosing and supply them with alternate implementations simultaneously.
+
 ## Stop functions
 
 The only thing Yurt requires from `defstate`s is that their `:stop` functions are 1 arity (i.e. take one argument). When the `(yurt/destroy)` is called, it would pass the actual instance of a component to this `:stop` function.
