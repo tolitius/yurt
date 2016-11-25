@@ -2,13 +2,10 @@
   (:require [mount.core :as mount]))
 
 (defprotocol Hut
-  (build [this] "builds a hut")
-  (destroy [this] "destroys a hut")
-  (build-with [this substitutes] "builds a hut with some components substituted")
-  (build-only [this components] "builds a hut out of only components provided")
-  ;; (build-without [this components])
-  ;; (destroy-except [this components])
-  )
+  (build [this]
+         [this opts] "builds a hut")
+  (destroy [this]
+           [thi opts] "destroys a hut"))
 
 (defrecord Yurt [components blueprint])
 
@@ -19,7 +16,10 @@
                   (when-let [fun (f state)]
                     [name fun])))))
 
-(defn- bulldoze [components funs]
+(defn- bulldoze 
+  ([components funs]
+   (bulldoze components funs {}))
+  ([components funs {:keys [except]}]                   ;; TODO: opts (i.e. except, only, etc..)
   (reduce (fn [cs [name fun]]
             (let [component (components name)]
               (if (and component                        ;; only destroy existing components
@@ -28,7 +28,7 @@
                     (conj cs name))
                 cs)))
           #{}
-          funs))
+          funs)))
 
 (defn- unvar-state [s]
   (->> s (drop 2) (apply str)))  ;; magic 2 is removing "#'" in state name
@@ -67,15 +67,20 @@
         (for [[k v] m]
           [(var-state k) v])))
 
-;; TODO: combinations of only/swap/etc..
-(defn- spawn [sys & {:keys [swap only] :as ops}]
-  (condp some (keys ops)
+(defn- spawn 
+  ([sys]
+   (spawn sys {}))
+  ([sys {:keys [swap only] :as ops}]
+  (condp = (set (keys ops))                          ;;TODO: this should be solved via composition vs. combinations
+    #{:swap :only} (-> (mount/swap (var-subs swap))
+                       (mount/only (var-comp only))
+                       (mount/start))
     #{:swap} (mount/start-with (var-subs swap))
     #{:only} (mount/start (var-comp only))
     (mount/start))
   (let [spawned (attach @sys :only only)]
     (detach @sys)
-    spawned))
+    spawned)))
 
 (defn- not-started [states]
   (into {}
@@ -96,8 +101,8 @@
         stop-fns (reverse (select-fun states :stop))]
     (extend-type Yurt
       Hut
-      (build [_] (->Yurt (spawn meta-state) bp))
-      (build-with [_ substitutes] (->Yurt (spawn meta-state :swap substitutes) bp))
-      (build-only [_ components] (->Yurt (spawn meta-state :only components) bp))
-      (destroy [it] {:stopped (bulldoze (:components it) stop-fns)}))
+      (build ([_] (->Yurt (spawn meta-state) bp))
+             ([_ opts] (->Yurt (spawn meta-state opts) bp)))
+      (destroy ([it] {:stopped (bulldoze (:components it) stop-fns)})
+               ([it opts] {:stopped (bulldoze (:components it) stop-fns opts)})))
     (->Yurt (not-started states) bp)))
