@@ -21,29 +21,21 @@
 
 ;; datomic schema (staging for an example)
 (defn create-schema [conn]
-  (let [schema [{:db/id #db/id [:db.part/db]
-                 :db/ident :order/symbol
-                 :db/valueType :db.type/string
+  (let [schema [{:db/ident       :order/symbol
+                 :db/valueType   :db.type/string
                  :db/cardinality :db.cardinality/one
-                 :db/index true
-                 :db.install/_attribute :db.part/db}
+                 :db/index       true}
 
-                {:db/id #db/id [:db.part/db]
-                 :db/ident :order/bid
-                 :db/valueType :db.type/bigdec
-                 :db/cardinality :db.cardinality/one
-                 :db.install/_attribute :db.part/db}
-                
-                {:db/id #db/id [:db.part/db]
-                 :db/ident :order/qty
-                 :db/valueType :db.type/long
-                 :db/cardinality :db.cardinality/one
-                 :db.install/_attribute :db.part/db}
+                {:db/ident       :order/bid
+                 :db/valueType   :db.type/bigdec
+                 :db/cardinality :db.cardinality/one}
 
-                {:db/id #db/id [:db.part/db]
-                 :db/ident :order/offer
-                 :db/valueType :db.type/bigdec
-                 :db/cardinality :db.cardinality/one
-                 :db.install/_attribute :db.part/db}]]
+                {:db/ident       :order/qty
+                 :db/valueType   :db.type/long
+                 :db/cardinality :db.cardinality/one}
+
+                {:db/ident       :order/offer
+                 :db/valueType   :db.type/bigdec
+                 :db/cardinality :db.cardinality/one}]]
 
         @(d/transact conn schema)))

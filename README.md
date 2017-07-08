@@ -1,8 +1,8 @@
 # yurt
 
-  module  |  branch  |  status
-----------|----------|----------
-   yurt   | `master` | [![Circle CI](https://circleci.com/gh/tolitius/yurt/tree/master.png?style=svg)](https://circleci.com/gh/tolitius/yurt/tree/master)
+| module | branch   | status                                   |
+| ------ | -------- | ---------------------------------------- |
+| yurt   | `master` | [![Circle CI](https://circleci.com/gh/tolitius/yurt/tree/master.png?style=svg)](https://circleci.com/gh/tolitius/yurt/tree/master) |
 
 [![Clojars Project](http://clojars.org/yurt/latest-version.svg)](http://clojars.org/yurt)
 
@@ -88,7 +88,7 @@ While having a development Yurt in the REPL, it might be useful to create a test
 
 Usually a test Yurt would be started with a different configuration so, for example, dev and test HTTP server components can run simultaneously on different ports.
 
-This can be done with the `(yurt/build-with)` function:
+This can be done with the `:swap` option of the  `(yurt/build)` function:
 
 ```clojure
 (require '[clojure.edn :as edn])
@@ -96,20 +96,20 @@ This can be done with the `(yurt/build-with)` function:
 ```
 
 ```clojure
-(def test-yurt (yurt/build-with 
-                 (yurt/blueprint) 
-                 {"neo.conf/config" test-config}))
+(def test-yurt (yurt/build
+                 (yurt/blueprint)
+                 {:swap {"neo.conf/config" test-config}}))
 ```
 
-`(build-with)` takes a blueprint and a map where keys are component names, and values are the substitutes (i.e. any values), in this case `test-config` is a substitute.
+The value of the `:swap` key is a map where keys are component names, and values are the substitutes (i.e. any values), in this case `test-config` is a substitute.
 
 ## Building Smaller Yurts
 
-A Yurt can be built with `only` certain components specified:
+A Yurt can be built with `:only` certain components specified:
 
 ```clojure
 dev=> (def bp (yurt/blueprint))
-dev=> (def dev-yurt (yurt/build-only bp #{"neo.conf/config" "neo.app/nrepl"}))
+dev=> (def dev-yurt (yurt/build bp {:only #{"neo.conf/config" "neo.app/nrepl"}}))
 
 INFO  utils.logging - >> starting.. #'neo.conf/config
 INFO  neo.conf - loading config from dev/resources/config.edn
@@ -118,8 +118,8 @@ INFO  utils.logging - >> starting.. #'neo.app/nrepl
 dev=>
 ```
 
-notice it was built with a `build-only` function that takes a blueprint and components
-that this Yurt should be built from. In this case `#{"neo.conf/config" "neo.app/nrepl"}`.
+notice it was built with a `:only` option of the `build` function which specifies which components
+this Yurt should be built from. In this case `#{"neo.conf/config" "neo.app/nrepl"}`.
 
 Here is what the built Yurt looks like:
 
@@ -169,18 +169,15 @@ One arity `:stop` functions is _the only_ requirement Yurt has for the mount app
 
 ## Show me
 
-sure.
+Sure.
+
+There are a [few example apps](https://github.com/tolitius/stater/) built for `mount`. One of them is called [neo](https://github.com/tolitius/stater/tree/master/neo). Yurt comes with an adapted version of the [neo](dev/clj/neo) app, which you can simply start by running:
 
 ```shell
-$ boot repl
+$ boot dev repl
 ```
 
-```clojure
-boot.user=> (dev)
-#object[clojure.lang.Namespace 0x61647fa2 "dev"]
-```
-
-Working with a [neo](dev/clj/neo) `mount` sample app that comes with Yurt sources and has 4 components (`mount` states):
+This modified neo app has 4 components (aka `mount` states):
 
 * `config`, loaded from the files and refreshed on each (reset)
 * `datomic connection` that uses the config to create itself
@@ -248,24 +245,19 @@ dev=> (def test-config (edn/read-string (slurp "dev/resources/test-config.edn"))
 #'dev/test-config
 ```
 
-notice we are building it by the same blueprint:
+notice we are building it by the same blueprint just substituting the config component with the test config:
 
 ```clojure
-dev=> (def test-yurt (yurt/build-with (yurt/blueprint) {"neo.conf/config" test-config}))
+dev=> (def test-yurt (yurt/build (yurt/blueprint)
+                                 {:swap {"neo.conf/config" test-config}}))
 INFO  neo.db - conf:  {:datomic {:uri datomic:mem://test-yurt}, :www {:port 4200}, :nrepl {:host 0.0.0.0, :port 7800}}
 INFO  neo.db - creating a connection to datomic: datomic:mem://test-yurt
 #'dev/test-yurt
 ```
 
-just substituting the config component _with_ the test config:
-
-```clojure
-;; e.g. (yurt/build-with (yurt/blueprint) {"neo.conf/config" test-config})
-```
-
 notice the config ports an datomic uri ^^^.
 
-we can substitute as many components as we want since `build-with` takes a map where keys are the state names, and values are the substitutes (i.e. any values).
+we can substitute as many components as we want since `build ... {:swap {...}}` takes a map where keys are the state names, and values are the substitutes (i.e. any values).
 
 Let's look at what we've built:
 

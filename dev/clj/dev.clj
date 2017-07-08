@@ -13,7 +13,6 @@
             [neo.options.orders :refer [find-orders add-order]]))
 
 (with-logging-status)
-(load-data-readers!)
 
 (defn refresh []
   (tn/refresh))
