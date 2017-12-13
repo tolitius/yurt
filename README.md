@@ -8,12 +8,7 @@
 
 > <img src="doc/img/slack-icon.png" width="30px"> _any_ questions or feedback: [`#mount`](https://clojurians.slack.com/messages/mount/) clojurians slack channel (or just [open an issue](https://github.com/tolitius/yurt/issues))
 
-## What is it for?
-
-Building standalone application Yurts with [mount](https://github.com/tolitius/mount).
-
-Multiple brand new _local_ Yurts with components can be created and passed down to the application / REPL to be used _simultaneously_ in the same Clojure runtime for fun and profit.
-
+- [What is it for?](#what-is-it-for)
 - [Building Yurts](#building-yurts)
 - [Destroying Yurts](#destroying-yurts)
 - [Swapping Alternate Implementations](#swapping-alternate-implementations)
@@ -21,11 +16,25 @@ Multiple brand new _local_ Yurts with components can be created and passed down 
 - [Stop functions](#stop-functions)
 - [Show me](#show-me)
 
+## What is it for?
+
+This library manages application stateful components by packaging them in isolated local containers. It calls these containers `Yurt`s and makes sure each Yurt has it's own state and lifecyle.
+
+This is useful to
+
+* develop and run tests in the same REPL: by creating `dev` and `test` Yurts and work with them simultaneously
+* safely run tests in parallel without a fear of shared resources: i.e. different DB schemas, files, etc.
+* anything else that requires multiple clones of an application or its parts
+
+Yurt relies on [mount](https://github.com/tolitius/mount) to build these standalone containers. It only uses mount to _discover_ component (`defstate`s). When the Yurt is created it is fully _detached_ from Clojure vars: it becomes a standalone map of components.
+
+Multiple brand new _local_ Yurts with components can be created and passed down to the application / REPL to be used _simultaneously_ in the same Clojure runtime for fun and profit.
+
 ## Building Yurts
 
 Besides adding Yurt as a project dependency (boot / lein), nothing else needs to be done to an existing mount application to build Yurts for it.
 
-Before building local Yurts based on a mount application a "blueprint" needs to be created:
+Before building local Yurts based on a mount application a "blueprint" needs to be created. Blueprint is a data _about_ components that were discovered, i.e. not the actual components:
 
 ```clojure
 dev=> (yurt/blueprint)
@@ -43,7 +52,7 @@ dev=> (yurt/blueprint)
 
 Since Yurt builds upon the knowledge that mount has about an application, this blueprint merely reflects that knowledge.
 
-Now we can build a local Yurt based on this blueprint:
+Now, based on this blueprint, we can build a local Yurt that would have real, "started" components:
 
 ```clojure
 dev=> (def bp (yurt/blueprint))
