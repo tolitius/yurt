@@ -18,7 +18,7 @@
 
 ## What is it for?
 
-This library manages application stateful components by packaging them in isolated local containers. It calls these containers `Yurt`s and makes sure each Yurt has it's own state and lifecyle.
+This library manages application stateful components by packaging them in isolated local containers. It calls these containers Yurts and makes sure each Yurt has its own state and lifecyle.
 
 This is useful to
 
