@@ -26,7 +26,7 @@ This is useful to
 * safely run tests in parallel without a fear of shared resources: i.e. different DB schemas, files, etc.
 * anything else that requires multiple clones of an application or its parts
 
-Yurt relies on [mount](https://github.com/tolitius/mount) to build these standalone containers. It only uses mount to _discover_ component (`defstate`s). When the Yurt is created it is fully _detached_ from Clojure vars: it becomes a standalone map of components.
+Yurt relies on [mount](https://github.com/tolitius/mount) to build these standalone containers. It only uses mount to _discover_ component (`defstate`s), learn about components' dependecies and their start and stop functions. When the Yurt is created it is fully _detached_ from Clojure vars: it becomes a standalone map of components.
 
 Multiple brand new _local_ Yurts with components can be created and passed down to the application / REPL to be used _simultaneously_ in the same Clojure runtime for fun and profit.
 
@@ -34,7 +34,7 @@ Multiple brand new _local_ Yurts with components can be created and passed down 
 
 Besides adding Yurt as a project dependency (boot / lein), nothing else needs to be done to an existing mount application to build Yurts for it.
 
-Before building local Yurts based on a mount application a "blueprint" needs to be created. Blueprint is a data _about_ components that were discovered, i.e. not the actual components:
+Before building local Yurts based on a mount application a "blueprint" needs to be created. Blueprint is data _about_ components that were discovered, i.e. not the actual components:
 
 ```clojure
 dev=> (yurt/blueprint)
