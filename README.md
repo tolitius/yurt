@@ -13,6 +13,7 @@
 - [Destroying Yurts](#destroying-yurts)
 - [Swapping Alternate Implementations](#swapping-alternate-implementations)
 - [Building Smaller Yurts](#building-smaller-yurts)
+- [Declarative Yurts](#declarative-yurts)
 - [Stop functions](#stop-functions)
 - [Show me](#show-me)
 
@@ -158,6 +159,37 @@ dev=> (yurt/destroy dev-yurt)
 
 only the components that were part of the Yurt were stopped. In this case `"neo.app/nrepl"`,
 since `"neo.conf/config"` does not have a stop function.
+
+## Declarative Yurts
+
+Besides using `build-with` and `build-only` functions Yurts can be configured declaritively with a `:swap` map and an `:only` vector which can be used by itself or together:
+
+```clojure
+dev=> (def test-yurt (yurt/build (yurt/blueprint)
+                                 {:swap {"neo.conf/config" test-config}}))
+```
+
+or
+
+```clojure
+dev=> (def test-yurt (yurt/build (yurt/blueprint)
+                                 {:swap {"neo.conf/config" test-config}
+                                  :only ["neo.conf/config" "neo.db/db"]}))
+```
+
+which would not start `neo.www/neo-app` _and_ would swap config with a test one:
+
+```clojure
+dev=> ((-> test-yurt :components) "neo.www/neo-app")
+nil
+```
+
+```clojure
+dev=> ((-> test-yurt :components) "neo.conf/config")
+{:datomic {:uri "datomic:mem://test-yurt"},
+ :www {:port 4200},
+ :nrepl {:host "0.0.0.0", :port 7800}}
+```
 
 ## Stop functions
 
