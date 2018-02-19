@@ -2,7 +2,7 @@
 
 (set-env!
   :source-paths #{"src"}
-  :dependencies '[[mount                          "0.1.10"]
+  :dependencies '[[mount                          "0.1.12"]
 
                   ;; deps for sample apps
                   [datascript                     "0.13.3"    :scope "provided"]

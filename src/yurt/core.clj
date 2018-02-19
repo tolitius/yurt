@@ -16,7 +16,7 @@
                   (when-let [fun (f state)]
                     [name fun])))))
 
-(defn- bulldoze 
+(defn- bulldoze
   ([components funs]
    (bulldoze components funs {}))
   ([components funs {:keys [except]}]                   ;; TODO: opts (i.e. except, only, etc..)
@@ -67,7 +67,7 @@
         (for [[k v] m]
           [(var-state k) v])))
 
-(defn- spawn 
+(defn- spawn
   ([sys]
    (spawn sys {}))
   ([sys {:keys [swap only] :as ops}]
@@ -94,7 +94,7 @@
 
 (defn blueprint []
   (let [meta-state @#'mount.core/meta-state
-        states (-> (sort-by (comp :order val) < 
+        states (-> (sort-by (comp :order val) <
                             @meta-state)
                     unvar-names)
         bp (new-blueprint states)
