@@ -98,7 +98,7 @@ While having a development Yurt in the REPL, it might be useful to create a test
 
 Usually a test Yurt would be started with a different configuration so, for example, dev and test HTTP server components can run simultaneously on different ports.
 
-This can be done with the `(yurt/build-with)` function:
+This can be done with the `:swap` option:
 
 ```clojure
 (require '[clojure.edn :as edn])
@@ -106,42 +106,43 @@ This can be done with the `(yurt/build-with)` function:
 ```
 
 ```clojure
-(def test-yurt (yurt/build-with 
-                 (yurt/blueprint) 
-                 {"neo.conf/config" test-config}))
+(def test-yurt (yurt/build (yurt/blueprint) 
+                           {:swap {"neo.conf/config" test-config}}))
 ```
 
-`(build-with)` takes a blueprint and a map where keys are component names, and values are the substitutes (i.e. any values), in this case `test-config` is a substitute.
+`:swap` takes a map of component names and their substitutes. In this case `test-config` is a substitute for the value of `"neo.conf/config"` component.
 
 ## Building Smaller Yurts
 
-A Yurt can be built with `only` certain components specified:
+A Yurt can be built with `only` certain components specified with an `:only` option:
 
 ```clojure
 dev=> (def bp (yurt/blueprint))
-dev=> (def dev-yurt (yurt/build-only bp #{"neo.conf/config" "neo.app/nrepl"}))
+
+dev=> (def small-yurt (yurt/build (yurt/blueprint)
+                                  {:only #{"neo.conf/config"
+                                           "neo.app/nrepl"}}))
 
 INFO  utils.logging - >> starting.. #'neo.conf/config
 INFO  neo.conf - loading config from dev/resources/config.edn
 INFO  utils.logging - >> starting.. #'neo.app/nrepl
-#'dev/dev-yurt
+#'dev/small-yurt
 dev=>
 ```
 
-notice it was built with a `build-only` function that takes a blueprint and components
-that this Yurt should be built from. In this case `#{"neo.conf/config" "neo.app/nrepl"}`.
+`:only` option that takes a sequence of component names to start, or in other words, components that this Yurt should be built from. In this case `#{"neo.conf/config" "neo.app/nrepl"}`.
 
 Here is what the built Yurt looks like:
 
 ```clojure
-dev=> (pprint dev-yurt)
+dev=> (pprint small-yurt)
 {:components
  {"neo.conf/config"
   {:datomic {:uri "datomic:mem://yurt"},
    :www {:port 4242},
    :nrepl {:host "0.0.0.0", :port 7878}},
   "neo.app/nrepl"
-  #clojure.tools.nrepl.server.Server{:server-socket #object[java.net.ServerSocket 0x173f7861 "ServerSocket[addr=/0.0.0.0,localport=7878]"], :port 7878, :open-transports #object[clojure.lang.Atom 0x284e5c96 {:status :ready, :val #{}}], :transport #object[clojure.tools.nrepl.transport$bencode 0x78bb7947 "clojure.tools.nrepl.transport$bencode@78bb7947"], :greeting nil, :handler #object[clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__2035 0x72d2a9bf "clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__2035@72d2a9bf"], :ss #object[java.net.ServerSocket 0x173f7861 "ServerSocket[addr=/0.0.0.0,localport=7878]"]}},
+  #clojure.tools.nrepl.server.Server{:server-socket #object[java.net.ServerSocket 0x7e5ffa33 "ServerSocket[addr=/0.0.0.0,localport=7878]"], :port 7878, :open-transports #object[clojure.lang.Atom 0x6d7364 {:status :ready, :val #{}}], :transport #object[clojure.tools.nrepl.transport$bencode 0x7a4c511f "clojure.tools.nrepl.transport$bencode@7a4c511f"], :greeting nil, :handler #object[clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__2241 0x3ca87a46 "clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__2241@3ca87a46"], :ss #object[java.net.ServerSocket 0x7e5ffa33 "ServerSocket[addr=/0.0.0.0,localport=7878]"]}},
  :blueprint
  {"neo.conf/config" {:order 1},
   "neo.db/db" {:order 2},
@@ -153,23 +154,16 @@ i.e. only `"neo.conf/config"` and `"neo.app/nrepl"` are the components of this Y
 
 and when this yurt is destroyed:
 ```clojure
-dev=> (yurt/destroy dev-yurt)
+dev=> (yurt/destroy small-yurt)
 {:stopped #{"neo.app/nrepl"}}
 ```
 
 only the components that were part of the Yurt were stopped. In this case `"neo.app/nrepl"`,
-since `"neo.conf/config"` does not have a stop function.
+since `"neo.conf/config"` does not have a "`:stop`" function.
 
 ## Declarative Yurts
 
-Besides using `build-with` and `build-only` functions Yurts can be configured declaritively with a `:swap` map and an `:only` vector which can be used by itself or together:
-
-```clojure
-dev=> (def test-yurt (yurt/build (yurt/blueprint)
-                                 {:swap {"neo.conf/config" test-config}}))
-```
-
-or
+Yurts can be configured declaritively with both a `:swap` map and an `:only` sequence:
 
 ```clojure
 dev=> (def test-yurt (yurt/build (yurt/blueprint)
@@ -380,7 +374,7 @@ Great, we are now ready to build as many _local_, `mount` based Yurts as we'd li
 
 ## License
 
-Copyright © 2016 tolitius
+Copyright © 2018 tolitius
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
