@@ -286,7 +286,7 @@ dev=> (def test-config (edn/read-string (slurp "dev/resources/test-config.edn"))
 notice we are building it by the same blueprint:
 
 ```clojure
-dev=> (def test-yurt (yurt/build-with (yurt/blueprint) {"neo.conf/config" test-config}))
+dev=> (def test-yurt (yurt/build (yurt/blueprint) {:swap {"neo.conf/config" test-config}}))
 INFO  neo.db - conf:  {:datomic {:uri datomic:mem://test-yurt}, :www {:port 4200}, :nrepl {:host 0.0.0.0, :port 7800}}
 INFO  neo.db - creating a connection to datomic: datomic:mem://test-yurt
 #'dev/test-yurt
@@ -295,12 +295,12 @@ INFO  neo.db - creating a connection to datomic: datomic:mem://test-yurt
 just substituting the config component _with_ the test config:
 
 ```clojure
-;; e.g. (yurt/build-with (yurt/blueprint) {"neo.conf/config" test-config})
+;; e.g. (yurt/build (yurt/blueprint) {:swap {"neo.conf/config" test-config}})
 ```
 
 notice the config ports an datomic uri ^^^.
 
-we can substitute as many components as we want since `build-with` takes a map where keys are the state names, and values are the substitutes (i.e. any values).
+we can substitute as many components as we want since `:swap` takes a map where keys are the state names, and values are the substitutes (i.e. any values).
 
 Let's look at what we've built:
 
