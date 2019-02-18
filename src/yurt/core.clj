@@ -5,7 +5,7 @@
   (build [this]
          [this opts] "builds a hut")
   (destroy [this]
-           [thi opts] "destroys a hut"))
+           [this opts] "destroys a hut"))
 
 (defrecord Yurt [components blueprint])
 
